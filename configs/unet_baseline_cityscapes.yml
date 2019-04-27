@@ -4,8 +4,8 @@ data:
     dataset: cityscapes
     train_split: train
     val_split: val
-    img_rows: 1024
-    img_cols: 2048
+    img_rows: 512
+    img_cols: 1024
     path: ../data/cityscapes
 training:
     train_iters: 44625  # 60 epochs at batchsize=4
@@ -29,5 +29,5 @@ training:
         hue: 0.1
         brightness: 0.3
         saturation: 0.3
-        rcrop: [1008, 2032]
+        rcrop: [496, 1008]
         hflip: 0.5
