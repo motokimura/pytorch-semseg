@@ -9,6 +9,8 @@ from ptsemseg.models.icnet import icnet
 from ptsemseg.models.linknet import linknet
 from ptsemseg.models.frrn import frrn
 
+from ptsemseg.models.unet_baseline import unet_baseline
+
 
 def get_model(model_dict, n_classes, version=None):
     name = model_dict["arch"]
@@ -61,6 +63,7 @@ def _get_model_instance(name):
             "linknet": linknet,
             "frrnA": frrn,
             "frrnB": frrn,
+            "unet_baseline": unet_baseline,
         }[name]
     except:
         raise ("Model {} not available".format(name))
