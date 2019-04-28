@@ -1,5 +1,6 @@
 model:
-    arch: unet_baseline
+    arch: unet_octconv
+    alpha: 0.25
 data:
     dataset: cityscapes
     train_split: train
@@ -20,7 +21,7 @@ training:
         max_iter: 89500
     momentum: 0.99
     weight_decay: 0.0005
-    resume: unet_baseline_best_model.pkl
+    resume: unet_octconv_best_model.pkl
     visdom: False
     n_workers: 2
     loss:
