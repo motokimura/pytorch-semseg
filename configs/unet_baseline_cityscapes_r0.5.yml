@@ -8,7 +8,7 @@ data:
     img_cols: 1024
     path: ../data/cityscapes
 training:
-    train_iters: 44625  # 60 epochs at batchsize=4
+    train_iters: 89500  # ~120 epochs at batchsize=4
     batch_size: 4
     val_interval: 500
     print_interval: 25
@@ -17,7 +17,7 @@ training:
         name: adam
     lr_schedule:
         name: poly_lr
-        max_iter: 44625
+        max_iter: 89500
     momentum: 0.99
     weight_decay: 0.0005
     resume: unet_baseline_best_model.pkl
