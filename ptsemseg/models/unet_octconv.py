@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from .unet_octconv_parts import *
 
 class unet_octconv(nn.Module):
-    def __init__(self, n_classes=21, in_channels=3, alpha=0.25):
+    def __init__(self, n_classes=21, in_channels=3, alpha=0.5):
         super(unet_octconv, self).__init__()
         self.inc = inconv(in_channels, 64, alpha)
         self.down1 = down(64, 128, alpha)

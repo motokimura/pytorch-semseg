@@ -133,7 +133,7 @@ class OctConvPool2d(nn.Module):
 
 
 class OctConvUpsample(nn.Module):
-    def __init__(self, channels, scale_factor, alpha=0.5, mode='bilinear', align_corners=True):
+    def __init__(self, channels, scale_factor, mode='bilinear', align_corners=True, alpha=0.5):
         super(OctConvUpsample, self).__init__()
 
         assert 0 <= alpha <= 1, "Alpha must be in interval [0, 1]"
