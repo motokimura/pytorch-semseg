@@ -10,6 +10,7 @@ from ptsemseg.models.linknet import linknet
 from ptsemseg.models.frrn import frrn
 
 from ptsemseg.models.unet_baseline import unet_baseline
+from ptsemseg.models.unet_octconv import unet_octconv
 
 
 def get_model(model_dict, n_classes, version=None):
@@ -64,6 +65,7 @@ def _get_model_instance(name):
             "frrnA": frrn,
             "frrnB": frrn,
             "unet_baseline": unet_baseline,
+            "unet_baseline": unet_octconv,
         }[name]
     except:
         raise ("Model {} not available".format(name))
