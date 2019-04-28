@@ -16,10 +16,10 @@ class double_conv(nn.Module):
         super(double_conv, self).__init__()
         self.conv = nn.Sequential(
             OctConv2d(in_ch, out_ch, 3, alphas=alphas1),
-            OctConvBatchNorm2d(out_ch, alpha1[1]),
+            OctConvBatchNorm2d(out_ch, alphas1[1]),
             nn.ReLU(inplace=True),
             OctConv2d(out_ch, out_ch, 3, alphas=alphas2),
-            OctConvBatchNorm2d(out_ch, alpha2[1]),
+            OctConvBatchNorm2d(out_ch, alphas2[1]),
             nn.ReLU(inplace=True)
         )
 
