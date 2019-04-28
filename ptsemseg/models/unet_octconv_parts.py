@@ -45,7 +45,7 @@ class down(nn.Module):
         super(down, self).__init__()
         alphas = (alpha, alpha)
         self.mpconv = nn.Sequential(
-            OctConvPool2d(in_ch, kernel_size=2, stride=2, mode='max'),
+            OctConvPool2d(in_ch, kernel_size=2, stride=2, mode='max', alpha=alpha),
             double_conv(in_ch, out_ch, alphas, alphas)
         )
 
