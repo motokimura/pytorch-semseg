@@ -130,3 +130,72 @@ class OctConvPool2d(nn.Module):
         hf_pool = hf_pool.reshape(-1, 4 * self.ch_hf, fmap_height, fmap_width)
         output = torch.cat([hf_pool, lf_pool], dim=1)  # cat over channel dim
         return output
+
+
+class OctConvUpsample(nn.Module):
+    def __init__(self, channels, scale_factor, alpha=0.5, mode='bilinear', align_corners=True):
+        super(OctConvUpsample, self).__init__()
+
+        assert 0 <= alpha <= 1, "Alpha must be in interval [0, 1]"
+        # input channels
+        self.ch_lf = int(alpha * channels)
+        self.ch_hf = channels - self.ch_lf
+
+        # prepare upsample layer to be applied to both lf and hf features
+        self.upsample = nn.Upsample(scale_factor=scale_factor, mode=mode, align_corners=align_corners)
+
+    def forward(self, x):
+        # case in which either of low- or high-freq repr is given
+        if self.ch_hf == 0 or self.ch_lf == 0:
+            return self.upsample(x)
+        
+        # decompose features into high/low repr
+        fmap_height, fmap_width = x.shape[-2], x.shape[-1]
+        hf_input = x[:, :self.ch_hf * 4, ...].reshape(-1, self.ch_hf, fmap_height * 2, fmap_width * 2)
+        lf_input = x[:, self.ch_hf * 4:, ...]
+
+        # apply upsampling
+        hf_up = self.upsample(hf_input)
+        lf_up = self.upsample(lf_input)
+
+        # compose high/low features into a tensor
+        fmap_height, fmap_width = hf_up.shape[-2] // 2, hf_up.shape[-1] // 2
+        hf_up = hf_up.reshape(-1, 4 * self.ch_hf, fmap_height, fmap_width)
+        output = torch.cat([hf_up, lf_up], dim=1)  # cat over channel dim
+        return output
+
+
+class OctConvBatchNorm2d(nn.Module):
+    def __init__(self, channels, alpha=0.5):
+        super(OctConvBatchNorm2d, self).__init__()
+
+        assert 0 <= alpha <= 1, "Alpha must be in interval [0, 1]"
+        # input channels
+        self.ch_lf = int(alpha * channels)
+        self.ch_hf = channels - self.ch_lf
+
+        # prepare batchnorm layers for lf and hf features
+        self.bn_lf = nn.BatchNorm2d(self.ch_lf) if self.ch_lf > 0 else None
+        self.bn_hf = nn.BatchNorm2d(self.ch_hf) if self.ch_hf > 0 else None
+
+    def forward(self, x):
+        # case in which either of low- or high-freq repr is given
+        if self.bn_lf is None:
+            return self.bn_hf(x)
+        if self.bn_hf is None:
+            return self.bn_lf(x)
+        
+        # decompose features into high/low repr
+        fmap_height, fmap_width = x.shape[-2], x.shape[-1]
+        hf_input = x[:, :self.ch_hf * 4, ...].reshape(-1, self.ch_hf, fmap_height * 2, fmap_width * 2)
+        lf_input = x[:, self.ch_hf * 4:, ...]
+
+        # apply batch normalization
+        hf_bn = self.bn_hf(hf_input)
+        lf_bn = self.bn_lf(lf_input)
+
+        # compose high/low features into a tensor
+        fmap_height, fmap_width = hf_bn.shape[-2] // 2, hf_bn.shape[-1] // 2
+        hf_bn = hf_bn.reshape(-1, 4 * self.ch_hf, fmap_height, fmap_width)
+        output = torch.cat([hf_bn, lf_bn], dim=1)  # cat over channel dim
+        return output
