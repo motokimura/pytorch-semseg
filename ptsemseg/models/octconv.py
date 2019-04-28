@@ -43,53 +43,47 @@ class OctConv2d(nn.Module):
         if not (self.ch_out_lf == 0 or self.ch_in_lf == 0):
             self.wLtoL = nn.Parameter(torch.randn(self.ch_out_lf, self.ch_in_lf, kernel_size, kernel_size))
 
-        # PADDING: (H - F + 2P)/S + 1 = 2 * [(0.5 H - F + 2P)/S +1] -> P = (F-S)/2
+        # padding: (H - F + 2P)/S + 1 = 2 * [(0.5 H - F + 2P)/S +1] -> P = (F-S)/2
         self.padding = (kernel_size - stride) // 2
 
     def forward(self, x):
+        hf, lf = None, None
         # logic to handle input tensors:
         # if ch_in_lf = 0., we assume to be at the first layer, with only high freq repr
         if self.ch_in_lf == 0:
-            hf_input = x
-            lf_input = None
+            hf = x
         elif self.ch_in_hf == 0:
-            lf_input = x
-            hf_input = None
+            lf = x
         else:
-            fmap_height, fmap_width = x.shape[-2], x.shape[-1]
-            hf_input = x[:, :self.ch_in_hf * 4, ...].reshape(-1, self.ch_in_hf, fmap_height * 2, fmap_width * 2)
-            lf_input = x[:, self.ch_in_hf * 4:, ...]
+            hf, lf = x
 
         # apply convolutions
         HtoH = HtoL = LtoL = LtoH = 0.
         if self.wHtoH is not None:
-            HtoH = F.conv2d(hf_input, self.wHtoH, padding=self.padding)
+            HtoH = F.conv2d(hf, self.wHtoH, padding=self.padding)
         if self.wHtoL is not None:
-            HtoL = F.conv2d(F.avg_pool2d(hf_input, 2), self.wHtoL, padding=self.padding)
+            HtoL = F.conv2d(F.avg_pool2d(hf, 2), self.wHtoL, padding=self.padding)
         if self.wLtoH is not None:
             LtoH = F.interpolate(
-                F.conv2d(lf_input, self.wLtoH, padding=self.padding),
+                F.conv2d(lf, self.wLtoH, padding=self.padding),
                 scale_factor=2, mode='nearest'
             )
         if self.wLtoL is not None:
-            LtoL = F.conv2d(lf_input, self.wLtoL, padding=self.padding)
+            LtoL = F.conv2d(lf, self.wLtoL, padding=self.padding)
 
         # compute output tensors
-        hf_output = HtoH + LtoH
-        lf_output = LtoL + HtoL
+        hf = HtoH + LtoH
+        lf = LtoL + HtoL
 
         # logic to handle output tensors:
         # if ch_out_lf = 0., we assume to be at the last layer, with only high freq repr
         if self.ch_out_lf == 0:
-            output = hf_output
+            return hf
         elif self.ch_out_hf == 0:
-            output = lf_output
+            return lf
         else:
             # if alpha in (0, 1)
-            fmap_height, fmap_width = hf_output.shape[-2] // 2, hf_output.shape[-1] // 2
-            hf_output = hf_output.reshape(-1, 4 * self.ch_out_hf, fmap_height, fmap_width)
-            output = torch.cat([hf_output, lf_output], dim=1)  # cat over channel dim
-        return output
+            return (hf, lf)
 
 
 class OctConvPool2d(nn.Module):
@@ -115,21 +109,11 @@ class OctConvPool2d(nn.Module):
         # case in which either of low- or high-freq repr is given
         if self.ch_hf == 0 or self.ch_lf == 0:
             return self.pool(x)
-        
-        # decompose features into high/low repr
-        fmap_height, fmap_width = x.shape[-2], x.shape[-1]
-        hf_input = x[:, :self.ch_hf * 4, ...].reshape(-1, self.ch_hf, fmap_height * 2, fmap_width * 2)
-        lf_input = x[:, self.ch_hf * 4:, ...]
 
-        # apply pooling
-        hf_pool = self.pool(hf_input)
-        lf_pool = self.pool(lf_input)
-
-        # compose high/low features into a tensor
-        fmap_height, fmap_width = hf_pool.shape[-2] // 2, hf_pool.shape[-1] // 2
-        hf_pool = hf_pool.reshape(-1, 4 * self.ch_hf, fmap_height, fmap_width)
-        output = torch.cat([hf_pool, lf_pool], dim=1)  # cat over channel dim
-        return output
+        hf, lf = x
+        hf = self.pool(hf)
+        lf = self.pool(lf)
+        return (hf, lf)
 
 
 class OctConvUpsample(nn.Module):
@@ -148,21 +132,11 @@ class OctConvUpsample(nn.Module):
         # case in which either of low- or high-freq repr is given
         if self.ch_hf == 0 or self.ch_lf == 0:
             return self.upsample(x)
-        
-        # decompose features into high/low repr
-        fmap_height, fmap_width = x.shape[-2], x.shape[-1]
-        hf_input = x[:, :self.ch_hf * 4, ...].reshape(-1, self.ch_hf, fmap_height * 2, fmap_width * 2)
-        lf_input = x[:, self.ch_hf * 4:, ...]
 
-        # apply upsampling
-        hf_up = self.upsample(hf_input)
-        lf_up = self.upsample(lf_input)
-
-        # compose high/low features into a tensor
-        fmap_height, fmap_width = hf_up.shape[-2] // 2, hf_up.shape[-1] // 2
-        hf_up = hf_up.reshape(-1, 4 * self.ch_hf, fmap_height, fmap_width)
-        output = torch.cat([hf_up, lf_up], dim=1)  # cat over channel dim
-        return output
+        hf, lf = x
+        hf = self.upsample(hf)
+        lf = self.upsample(lf)
+        return (hf, lf)
 
 
 class OctConvBatchNorm2d(nn.Module):
@@ -184,18 +158,8 @@ class OctConvBatchNorm2d(nn.Module):
             return self.bn_hf(x)
         if self.bn_hf is None:
             return self.bn_lf(x)
-        
-        # decompose features into high/low repr
-        fmap_height, fmap_width = x.shape[-2], x.shape[-1]
-        hf_input = x[:, :self.ch_hf * 4, ...].reshape(-1, self.ch_hf, fmap_height * 2, fmap_width * 2)
-        lf_input = x[:, self.ch_hf * 4:, ...]
 
-        # apply batch normalization
-        hf_bn = self.bn_hf(hf_input)
-        lf_bn = self.bn_lf(lf_input)
-
-        # compose high/low features into a tensor
-        fmap_height, fmap_width = hf_bn.shape[-2] // 2, hf_bn.shape[-1] // 2
-        hf_bn = hf_bn.reshape(-1, 4 * self.ch_hf, fmap_height, fmap_width)
-        output = torch.cat([hf_bn, lf_bn], dim=1)  # cat over channel dim
-        return output
+        hf, lf = x
+        hf = self.bn_hf(hf)
+        lf = self.bn_lf(lf)
+        return (hf, lf)
