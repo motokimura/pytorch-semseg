@@ -65,7 +65,7 @@ def _get_model_instance(name):
             "frrnA": frrn,
             "frrnB": frrn,
             "unet_baseline": unet_baseline,
-            "unet_baseline": unet_octconv,
+            "unet_octconv": unet_octconv,
         }[name]
     except:
         raise ("Model {} not available".format(name))
