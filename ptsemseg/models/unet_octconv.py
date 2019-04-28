@@ -33,10 +33,3 @@ class unet_octconv(nn.Module):
         x = self.up4(x, x1)
         x = self.outc(x)
         return x
-
-
-# test purpose only
-unet = unet_octconv()
-data = torch.randn(2, 3, 128, 64)
-out = unet(data)
-print(out.shape)

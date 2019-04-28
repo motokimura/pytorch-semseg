@@ -130,14 +130,3 @@ class OctConvPool2d(nn.Module):
         hf_pool = hf_pool.reshape(-1, 4 * self.ch_hf, fmap_height, fmap_width)
         output = torch.cat([hf_pool, lf_pool], dim=1)  # cat over channel dim
         return output
-
-
-# test purpose only
-pool0 = OctConvPool2d(3, 2, 2, mode='avg', alpha=1.)
-oc0 = OctConv2d(in_channels=3, out_channels=20, kernel_size=3, alphas=(0., 0.5))
-oc1 = OctConv2d(in_channels=20, out_channels=40, kernel_size=7, alphas=(0.5, 0.5))
-pool1 = OctConvPool2d(40, 2, 2, mode='max', alpha=0.5)
-oc2 = OctConv2d(in_channels=40, out_channels=2, kernel_size=3, alphas=(0.5, 0.))
-pool2 = OctConvPool2d(2, 2, 2, mode='avg', alpha=0.)
-out = pool2(oc2(pool1(oc1(oc0(pool0(torch.randn(2, 3, 128, 64)))))))
-print(out.shape)
