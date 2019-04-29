@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .octconv import OctConv2d, OctConvPool2d, OctConvUpsample, OctConvBatchNorm2d, OctConvReLU
+from .octconv import OctConv2d, OctConvMaxPool2d, OctConvUpsample, OctConvBatchNorm2d, OctConvReLU
 
 
 class double_conv(nn.Module):
@@ -43,7 +43,7 @@ class down(nn.Module):
         super(down, self).__init__()
         alphas = (alpha, alpha)
         self.mpconv = nn.Sequential(
-            OctConvPool2d(in_ch, kernel_size=2, stride=2, mode='max', alpha=alpha),
+            OctConvMaxPool2d(in_ch, kernel_size=2, stride=2, alpha=alpha),
             double_conv(in_ch, out_ch, alphas, alphas)
         )
 
@@ -54,12 +54,13 @@ class down(nn.Module):
 class up(nn.Module):
     def __init__(self, in_ch, out_ch, alpha):
         super(up, self).__init__()
-        self.up = OctConvUpsample(in_ch // 2, scale_factor=2, alpha=alpha)
+        self.up = OctConvUpsample(in_ch // 2, scale_factor=2, mode='bilinear', alpha=alpha)
         alphas = (alpha, alpha)
         self.conv = double_conv(in_ch, out_ch, alphas, alphas)
 
     def forward(self, x1, x2):
         x1 = self.up(x1)
+        # XXX: error occurs when alpha = 0 or 1
         hf = torch.cat([x2[0], x1[0]], dim=1)
         lf = torch.cat([x2[1], x1[1]], dim=1)
         return self.conv((hf, lf))

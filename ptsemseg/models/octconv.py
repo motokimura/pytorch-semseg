@@ -86,10 +86,10 @@ class OctConv2d(nn.Module):
             return (hf, lf)
 
 
-class OctConvPool2d(nn.Module):
+class OctConvMaxPool2d(nn.Module):
     """Pooling module for 2d features represented by OctConv way.
     """
-    def __init__(self, channels, kernel_size, stride=None, mode='max', alpha=0.5):
+    def __init__(self, channels, kernel_size, stride=None, alpha=0.5):
         super(OctConvPool2d, self).__init__()
 
         assert 0 <= alpha <= 1, "Alpha must be in interval [0, 1]"
@@ -97,27 +97,22 @@ class OctConvPool2d(nn.Module):
         self.ch_lf = int(alpha * channels)
         self.ch_hf = channels - self.ch_lf
 
-        # prepare pooling layer to be applied to both lf and hf features
-        if mode == 'max':
-            self.pool = nn.MaxPool2d(kernel_size, stride)
-        elif mode == 'avg':
-            self.pool = nn.AvgPool2d(kernel_size, stride)
-        else:
-            raise NotImplementedError()
+        self.kernel_size = kernel_size
+        self.stride = stride
 
     def forward(self, x):
         # case in which either of low- or high-freq repr is given
         if self.ch_hf == 0 or self.ch_lf == 0:
-            return self.pool(x)
+            return F.max_pool2d(x, self.kernel_size, self.stride)
 
         hf, lf = x
-        hf = self.pool(hf)
-        lf = self.pool(lf)
+        hf = F.max_pool2d(hf, self.kernel_size, self.stride)
+        lf = F.max_pool2d(lf, self.kernel_size, self.stride)
         return (hf, lf)
 
 
 class OctConvUpsample(nn.Module):
-    def __init__(self, channels, scale_factor, mode='bilinear', align_corners=True, alpha=0.5):
+    def __init__(self, channels, scale_factor, mode='bilinear', alpha=0.5):
         super(OctConvUpsample, self).__init__()
 
         assert 0 <= alpha <= 1, "Alpha must be in interval [0, 1]"
@@ -125,17 +120,17 @@ class OctConvUpsample(nn.Module):
         self.ch_lf = int(alpha * channels)
         self.ch_hf = channels - self.ch_lf
 
-        # prepare upsample layer to be applied to both lf and hf features
-        self.upsample = nn.Upsample(scale_factor=scale_factor, mode=mode, align_corners=align_corners)
+        self.scale_factor = scale_factor
+        self.mode = mode
 
     def forward(self, x):
         # case in which either of low- or high-freq repr is given
         if self.ch_hf == 0 or self.ch_lf == 0:
-            return self.upsample(x)
+            return F.interpolate(x, scale_factor=self.scale_factor, mode=self.mode)
 
         hf, lf = x
-        hf = self.upsample(hf)
-        lf = self.upsample(lf)
+        hf = F.interpolate(hf, scale_factor=self.scale_factor, mode=self.mode)
+        lf = F.interpolate(lf, scale_factor=self.scale_factor, mode=self.mode)
         return (hf, lf)
 
 
@@ -174,15 +169,12 @@ class OctConvReLU(nn.Module):
         self.ch_lf = int(alpha * channels)
         self.ch_hf = channels - self.ch_lf
 
-        # prepare relu layers for lf and hf features
-        self.relu = nn.ReLU(inplace=True)
-
     def forward(self, x):
         # case in which either of low- or high-freq repr is given
         if self.ch_hf == 0 or self.ch_lf == 0:
-            return self.relu(x)
+            return F.relu(x, inplace=True)
 
         hf, lf = x
-        hf = self.relu(hf)
-        lf = self.relu(lf)
+        hf = F.relu(hf, inplace=True)
+        lf = F.relu(lf, inplace=True)
         return (hf, lf)
