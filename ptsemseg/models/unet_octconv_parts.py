@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .octconv import OctConv2d, OctConvPool2d, OctConvUpsample, OctConvBatchNorm2d
+from .octconv import OctConv2d, OctConvPool2d, OctConvUpsample, OctConvBatchNorm2d, OctConvReLU
 
 
 class double_conv(nn.Module):
@@ -17,10 +17,10 @@ class double_conv(nn.Module):
         self.conv = nn.Sequential(
             OctConv2d(in_ch, out_ch, 3, alphas=alphas1),
             OctConvBatchNorm2d(out_ch, alphas1[1]),
-            nn.ReLU(inplace=True),
+            OctConvReLU(out_ch, alphas1[1]),
             OctConv2d(out_ch, out_ch, 3, alphas=alphas2),
             OctConvBatchNorm2d(out_ch, alphas2[1]),
-            nn.ReLU(inplace=True)
+            OctConvReLU(out_ch, alphas2[1])
         )
 
     def forward(self, x):

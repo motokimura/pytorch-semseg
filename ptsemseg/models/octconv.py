@@ -163,3 +163,26 @@ class OctConvBatchNorm2d(nn.Module):
         hf = self.bn_hf(hf)
         lf = self.bn_lf(lf)
         return (hf, lf)
+
+
+class OctConvReLU(nn.Module):
+    def __init__(self, channels, alpha=0.5):
+        super(OctConvReLU, self).__init__()
+
+        assert 0 <= alpha <= 1, "Alpha must be in interval [0, 1]"
+        # input channels
+        self.ch_lf = int(alpha * channels)
+        self.ch_hf = channels - self.ch_lf
+
+        # prepare relu layers for lf and hf features
+        self.relu = nn.ReLU(inplace=True)
+
+    def forward(self, x):
+        # case in which either of low- or high-freq repr is given
+        if self.ch_hf == 0 or self.ch_lf == 0:
+            return self.relu(x)
+
+        hf, lf = x
+        hf = self.relu(hf)
+        lf = self.relu(lf)
+        return (hf, lf)
