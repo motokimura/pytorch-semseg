@@ -24,8 +24,7 @@ class double_conv(nn.Module):
         )
 
     def forward(self, x):
-        x = self.conv(x)
-        return x
+        return self.conv(x)
 
 
 class inconv(nn.Module):
@@ -36,8 +35,7 @@ class inconv(nn.Module):
         self.conv = double_conv(in_ch, out_ch, alphas1, alphas2)
 
     def forward(self, x):
-        x = self.conv(x)
-        return x
+        return self.conv(x)
 
 
 class down(nn.Module):
@@ -50,8 +48,7 @@ class down(nn.Module):
         )
 
     def forward(self, x):
-        x = self.mpconv(x)
-        return x
+        return self.mpconv(x)
 
 
 class up(nn.Module):
@@ -63,9 +60,9 @@ class up(nn.Module):
 
     def forward(self, x1, x2):
         x1 = self.up(x1)
-        x = torch.cat([x2, x1], dim=1)
-        x = self.conv(x)
-        return x
+        hf = torch.cat([x2[0], x1[0]], dim=1)
+        lf = torch.cat([x2[1], x1[1]], dim=1)
+        return self.conv((hf, lf))
 
 
 class outconv(nn.Module):
@@ -75,5 +72,4 @@ class outconv(nn.Module):
         self.conv = OctConv2d(in_ch, out_ch, 1, alphas=alphas)
 
     def forward(self, x):
-        x = self.conv(x)
-        return x
+        return self.conv(x)
