@@ -90,7 +90,7 @@ class OctConvMaxPool2d(nn.Module):
     """Pooling module for 2d features represented by OctConv way.
     """
     def __init__(self, channels, kernel_size, stride=None, alpha=0.5):
-        super(OctConvPool2d, self).__init__()
+        super(OctConvMaxPool2d, self).__init__()
 
         assert 0 <= alpha <= 1, "Alpha must be in interval [0, 1]"
         # input channels
