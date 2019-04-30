@@ -15,10 +15,10 @@ class double_conv(nn.Module):
     def __init__(self, in_ch, out_ch, alphas1, alphas2):
         super(double_conv, self).__init__()
         self.conv = nn.Sequential(
-            OctConv2d(in_ch, out_ch, 3, alphas=alphas1),
+            OctConv2d(in_ch, out_ch, 3, bias=False, alphas=alphas1),
             OctConvBatchNorm2d(out_ch, alphas1[1]),
             OctConvReLU(out_ch, alphas1[1]),
-            OctConv2d(out_ch, out_ch, 3, alphas=alphas2),
+            OctConv2d(out_ch, out_ch, 3, bias=False, alphas=alphas2),
             OctConvBatchNorm2d(out_ch, alphas2[1]),
             OctConvReLU(out_ch, alphas2[1])
         )
@@ -70,7 +70,7 @@ class outconv(nn.Module):
     def __init__(self, in_ch, out_ch, alpha):
         super(outconv, self).__init__()
         alphas = (alpha, 0.0)
-        self.conv = OctConv2d(in_ch, out_ch, 1, alphas=alphas)
+        self.conv = OctConv2d(in_ch, out_ch, 1, bias=True, alphas=alphas)
 
     def forward(self, x):
         return self.conv(x)
