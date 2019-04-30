@@ -97,17 +97,17 @@ class OctConvMaxPool2d(nn.Module):
         self.ch_lf = int(alpha * channels)
         self.ch_hf = channels - self.ch_lf
 
-        self.kernel_size = kernel_size
-        self.stride = stride
+        # prepare pooling layer  to be applied to both lf and hf features
+        self.pool = nn.MaxPool2d(kernel_size, stride)
 
     def forward(self, x):
         # case in which either of low- or high-freq repr is given
         if self.ch_hf == 0 or self.ch_lf == 0:
-            return F.max_pool2d(x, self.kernel_size, self.stride)
+            return self.pool(x)
 
         hf, lf = x
-        hf = F.max_pool2d(hf, self.kernel_size, self.stride)
-        lf = F.max_pool2d(lf, self.kernel_size, self.stride)
+        hf = self.pool(hf)
+        lf = self.pool(lf)
         return (hf, lf)
 
 
