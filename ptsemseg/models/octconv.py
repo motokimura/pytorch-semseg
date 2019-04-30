@@ -120,17 +120,17 @@ class OctConvUpsample(nn.Module):
         self.ch_lf = int(alpha * channels)
         self.ch_hf = channels - self.ch_lf
 
-        self.scale_factor = scale_factor
-        self.mode = mode
+        # prepare upsample layer to be applied to both lf and hf features
+        self.upsample = nn.Upsample(scale_factor=scale_factor, mode=mode)
 
     def forward(self, x):
         # case in which either of low- or high-freq repr is given
         if self.ch_hf == 0 or self.ch_lf == 0:
-            return F.interpolate(x, scale_factor=self.scale_factor, mode=self.mode)
+            return self.upsample(x)
 
         hf, lf = x
-        hf = F.interpolate(hf, scale_factor=self.scale_factor, mode=self.mode)
-        lf = F.interpolate(lf, scale_factor=self.scale_factor, mode=self.mode)
+        hf = self.upsample(hf)
+        lf = self.upsample(lf)
         return (hf, lf)
 
 
