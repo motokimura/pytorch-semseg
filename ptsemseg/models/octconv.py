@@ -97,17 +97,17 @@ class OctConvMaxPool2d(nn.Module):
         self.ch_lf = int(alpha * channels)
         self.ch_hf = channels - self.ch_lf
 
-        # prepare pooling layer  to be applied to both lf and hf features
-        self.pool = nn.MaxPool2d(kernel_size, stride)
+        self.kernel_size = kernel_size
+        self.stride = stride
 
     def forward(self, x):
         # case in which either of low- or high-freq repr is given
         if self.ch_hf == 0 or self.ch_lf == 0:
-            return self.pool(x)
+            return F.max_pool2d(x, self.kernel_size, self.stride)
 
         hf, lf = x
-        hf = self.pool(hf)
-        lf = self.pool(lf)
+        hf = F.max_pool2d(hf, self.kernel_size, self.stride)
+        lf = F.max_pool2d(lf, self.kernel_size, self.stride)
         return (hf, lf)
 
 
@@ -120,17 +120,17 @@ class OctConvUpsample(nn.Module):
         self.ch_lf = int(alpha * channels)
         self.ch_hf = channels - self.ch_lf
 
-        # prepare upsample layer to be applied to both lf and hf features
-        self.upsample = nn.Upsample(scale_factor=scale_factor, mode=mode)
+        self.scale_factor = scale_factor
+        self.mode = mode
 
     def forward(self, x):
         # case in which either of low- or high-freq repr is given
         if self.ch_hf == 0 or self.ch_lf == 0:
-            return self.upsample(x)
+            return F.interpolate(x, scale_factor=self.scale_factor, mode=self.mode)
 
         hf, lf = x
-        hf = self.upsample(hf)
-        lf = self.upsample(lf)
+        hf = F.interpolate(hf, scale_factor=self.scale_factor, mode=self.mode)
+        lf = F.interpolate(lf, scale_factor=self.scale_factor, mode=self.mode)
         return (hf, lf)
 
 
