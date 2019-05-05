@@ -30,5 +30,4 @@ training:
         hue: 0.1
         brightness: 0.3
         saturation: 0.3
-        rcrop: [496, 1008]
         hflip: 0.5
