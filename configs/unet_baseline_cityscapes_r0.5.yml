@@ -29,4 +29,5 @@ training:
         hue: 0.1
         brightness: 0.3
         saturation: 0.3
+        translate: [16, 16]
         hflip: 0.5
