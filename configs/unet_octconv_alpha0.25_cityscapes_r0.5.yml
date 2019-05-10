@@ -9,7 +9,7 @@ data:
     img_cols: 1024
     path: ../data/cityscapes
 training:
-    train_iters: 178500  # ~240 epochs at batchsize=4
+    train_iters: 100000
     batch_size: 4
     val_interval: 500
     print_interval: 25
@@ -30,5 +30,5 @@ training:
         hue: 0.1
         brightness: 0.3
         saturation: 0.3
-        rcrop: [496, 1008]
+        translate: [16, 16]
         hflip: 0.5
