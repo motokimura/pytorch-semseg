@@ -58,11 +58,19 @@ class OctConv2d(nn.Module):
         if self.LtoH is not None:
             oLtoH = F.interpolate(self.LtoH(lf), scale_factor=2, mode='nearest')
 
-        # compute output tensors
+        # compute output hf tensor
         if self.HtoH is not None:
             hf = self.HtoH(hf) + oLtoH
+        else:
+            hf = oLtoH
+            del oLtoH
+
+        # computer output lf tensor
         if self.LtoL is not None:
             lf = self.LtoL(lf) + oHtoL
+        else:
+            lf = oHtoL
+            del oHtoL
 
         # logic to handle output tensors:
         # if ch_out_lf = 0., assume to be at the last layer, with only high freq repr
