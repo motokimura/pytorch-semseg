@@ -51,26 +51,22 @@ class OctConv2d(nn.Module):
         else:
             hf, lf = x
 
-        # apply convolutions for information exchange b/w/ low and high freq
-        oHtoL = oLtoH = 0.
+        # apply convolutions
+        oHtoH = oHtoL = oLtoH = oLtoL = 0.
+        if self.HtoH is not None:
+            oHtoH = self.HtoH(hf)
         if self.HtoL is not None:
             oHtoL = self.HtoL(F.avg_pool2d(hf, 2))
         if self.LtoH is not None:
             oLtoH = F.interpolate(self.LtoH(lf), scale_factor=2, mode='nearest')
-
-        # compute output hf tensor
-        if self.HtoH is not None:
-            hf = self.HtoH(hf) + oLtoH
-        else:
-            hf = oLtoH
-            del oLtoH
-
-        # computer output lf tensor
         if self.LtoL is not None:
-            lf = self.LtoL(lf) + oHtoL
-        else:
-            lf = oHtoL
-            del oHtoL
+            oLtoL = self.LtoL(lf)
+
+        # compute output tensors
+        hf = oHtoH + oLtoH
+        lf = oLtoL + oHtoL
+
+        del oHtoH, oHtoL, oLtoH, oLtoL
 
         # logic to handle output tensors:
         # if ch_out_lf = 0., assume to be at the last layer, with only high freq repr
