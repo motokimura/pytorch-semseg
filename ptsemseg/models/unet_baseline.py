@@ -28,8 +28,12 @@ class unet_baseline(nn.Module):
         x4 = self.down3(x3)
         x5 = self.down4(x4)
         x = self.up1(x5, x4)
+        del x5, x4
         x = self.up2(x, x3)
+        del x3
         x = self.up3(x, x2)
+        del x2
         x = self.up4(x, x1)
+        del x1
         x = self.outc(x)
         return x

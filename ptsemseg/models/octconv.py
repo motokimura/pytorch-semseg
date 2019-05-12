@@ -66,6 +66,8 @@ class OctConv2d(nn.Module):
         hf = oHtoH + oLtoH
         lf = oLtoL + oHtoL
 
+        del oHtoH, oHtoL, oLtoH, oLtoL
+
         # logic to handle output tensors:
         # if ch_out_lf = 0., assume to be at the last layer, with only high freq repr
         if self.ch_out_lf == 0:
