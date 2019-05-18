@@ -76,6 +76,7 @@ class LIPSingleHumanParsingLoader(data.Dataset):
         image = torch.from_numpy(image).float()  # to torch.Tensor
 
         # label
+        label = np.array(label, dtype=int)  # PIL Image to numpy.array
         label = torch.from_numpy(label).long()
 
         return image, label
