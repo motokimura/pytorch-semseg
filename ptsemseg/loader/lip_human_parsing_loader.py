@@ -53,7 +53,7 @@ class LIPSingleHumanParsingLoader(data.Dataset):
             '{}.png'.format(file_id)
         )
 
-        image = Image.open(image_path)
+        image = Image.open(image_path).convert('RGB')
         label = Image.open(label_path)
 
         # resize image/label to self.img_size
