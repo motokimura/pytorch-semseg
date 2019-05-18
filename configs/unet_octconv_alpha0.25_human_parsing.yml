@@ -1,0 +1,34 @@
+model:
+    arch: unet_octconv
+    alpha: 0.25
+data:
+    dataset: lip_single_human_parsing
+    train_split: train
+    val_split: val
+    img_rows: 288
+    img_cols: 288
+    path: ../data/lip_single_human_parsing
+training:
+    train_iters: 100000
+    batch_size: 32
+    val_interval: 1000
+    print_interval: 50
+    optimizer:
+        lr: 1.0e-4
+        name: adam
+    lr_schedule:
+        name: poly_lr
+        max_iter: 100000
+    momentum: 0.99
+    weight_decay: 0.0005
+    resume: unet_baseline_best_model.pkl
+    visdom: False
+    n_workers: 2
+    loss:
+        name: cross_entropy
+    augmentations:
+        rcrop: [256, 256]
+        hue: 0.1
+        brightness: 0.3
+        saturation: 0.3
+        hflip: 0.5
