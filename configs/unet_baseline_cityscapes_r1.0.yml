@@ -8,16 +8,16 @@ data:
     img_cols: 2048
     path: ../data/cityscapes
 training:
-    train_iters: 200000
+    train_iters: 100000
     batch_size: 2
     val_interval: 1000
     print_interval: 50
     optimizer:
-        lr: 1.0e-3
+        lr: 1.0e-4
         name: adam
     lr_schedule:
         name: poly_lr
-        max_iter: 200000
+        max_iter: 100000
     momentum: 0.99
     weight_decay: 0.0005
     resume: unet_baseline_best_model.pkl
