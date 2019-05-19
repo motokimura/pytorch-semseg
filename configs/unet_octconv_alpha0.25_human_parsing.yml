@@ -10,7 +10,7 @@ data:
     path: ../data/lip_single_human_parsing
 training:
     train_iters: 100000
-    batch_size: 32
+    batch_size: 24
     val_interval: 1000
     print_interval: 50
     optimizer:
