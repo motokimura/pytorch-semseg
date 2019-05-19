@@ -18,8 +18,6 @@ training:
     lr_schedule:
         name: poly_lr
         max_iter: 100000
-    momentum: 0.99
-    weight_decay: 0.0005
     resume: unet_baseline_best_model.pkl
     visdom: False
     n_workers: 2
