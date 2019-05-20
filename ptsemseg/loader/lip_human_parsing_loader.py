@@ -16,11 +16,15 @@ class LIPSingleHumanParsingLoader(data.Dataset):
         root,
         split,
         is_transform=False,
-        img_size=288,
+        img_size=256,
         augmentations=None
     ):
         assert split in ['train', 'val']
-        assert type(img_size) == int, 'img_size must be a single integer.'
+
+        # FIXME: support non squared size
+        if isinstance(img_size, tuple):
+            assert img_size[0] == img_size[1], 'image must be a square'
+            img_size = img_size[0]
 
         self.root = root
         self.split = split
