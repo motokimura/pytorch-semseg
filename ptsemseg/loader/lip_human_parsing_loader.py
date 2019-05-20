@@ -118,7 +118,7 @@ class LIPSingleHumanParsingLoader(data.Dataset):
 
             left = (img_size - nw) // 2
             top = (img_size - nh) // 2
-            assert (left >= 0)  and (left >= 0)
+            assert (left >= 0)  and (top >= 0)
             image_padded.paste(image, (left, top))
             label_padded.paste(label, (left, top))
 
