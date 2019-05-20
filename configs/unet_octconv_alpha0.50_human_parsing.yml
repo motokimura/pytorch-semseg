@@ -1,6 +1,6 @@
 model:
     arch: unet_octconv
-    alpha: 0.25
+    alpha: 0.5
 data:
     dataset: lip_single_human_parsing
     train_split: train
