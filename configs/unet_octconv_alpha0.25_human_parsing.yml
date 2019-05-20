@@ -14,13 +14,14 @@ training:
     val_interval: 1000
     print_interval: 50
     optimizer:
-        lr: 1.0e-4
+        lr: 5.0e-4
         name: adam
     lr_schedule:
-        name: poly_lr
-        max_iter: 100000
-    momentum: 0.99
-    weight_decay: 0.0005
+        name: cosine_annealing
+        T_max: 100000
+        warmup_iters: 1000
+        warmup_mode: linear
+        warmup_factor: 0.2
     resume: unet_baseline_best_model.pkl
     visdom: False
     n_workers: 2
@@ -31,4 +32,3 @@ training:
         hue: 0.1
         brightness: 0.3
         saturation: 0.3
-        hflip: 0.5
