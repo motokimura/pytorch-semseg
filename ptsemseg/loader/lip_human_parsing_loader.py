@@ -116,8 +116,8 @@ class LIPSingleHumanParsingLoader(data.Dataset):
             image_padded = Image.new(image.mode, (img_size, img_size), (0, 0, 0)) # pad with black pixels
             label_padded = Image.new(label.mode, (img_size, img_size), 250)  # 250 is ignored when compute loss (see loss.py)
 
-            left = (nw - w) // 2
-            top = (nh - h) // 2
+            left = (img_size - nw) // 2
+            top = (img_size - nh) // 2
             assert (left >= 0)  and (left >= 0)
             image_padded.paste(image, (left, top))
             label_padded.paste(label, (left, top))
