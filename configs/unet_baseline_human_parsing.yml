@@ -4,8 +4,8 @@ data:
     dataset: lip_single_human_parsing
     train_split: train
     val_split: val
-    img_rows: 288
-    img_cols: 288
+    img_rows: 320
+    img_cols: 320
     path: ../data/lip_single_human_parsing
 training:
     train_iters: 100000
@@ -27,7 +27,7 @@ training:
     loss:
         name: cross_entropy
     augmentations:
-        rcrop: [256, 256]
+        rcrop: [288, 288]
         hue: 0.1
         brightness: 0.3
         saturation: 0.3
