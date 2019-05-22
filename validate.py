@@ -49,7 +49,8 @@ def validate(cfg, args):
         images = images.to(device)
 
         if args.eval_flip:
-            outputs = model(images)
+            with torch.no_grad():
+                outputs = model(images)
 
             # Flip images in numpy (not support in tensor)
             outputs = outputs.data.cpu().numpy()
@@ -61,7 +62,8 @@ def validate(cfg, args):
 
             pred = np.argmax(outputs, axis=1)
         else:
-            outputs = model(images)
+            with torch.no_grad():
+                outputs = model(images)
             pred = outputs.data.max(1)[1].cpu().numpy()
 
         gt = labels.numpy()
